@@ -1,0 +1,382 @@
+---
+title: "Core121 Weissman 2021 part2"
+output: pdf_document
+---
+
+
+# Data Visualizations with R workshop
+## CORE 121, Professor Weissman-Unni
+## September 17th, 2021
+
+
+### Goals of this workshop:
+
+* Refresh on Loading Data Sets
+* Manually Creating Data sets
+* Learn the basics of ggplot for visualizations
+* Practice creating bar charts, boxplots, pie charts, x/y charts
+* Save a plots as an image file
+
+### ASK FOR HELP IF YOU NEED IT!!!!
+* Jeremy: jeremym@lclark.edu
+* R Office hours: Tues/Thurs 2-3pm, Watzek 343, or by appointment
+
+
+### Load prerequisites
+
+First we need to load the Tidyverse.
+
+
+```{r}
+library(tidyverse)
+
+
+```
+
+Now load your file from Google Drive. As a refresher, here are the steps:
+
+
+* In another browser tab, find your data (or use https://bit.ly/jm-core121-data)
+* Take a moment, and eliminate any units from data (ideally include in row headers)!!
+* Make sure the "Phase 2:Data" worksheet is selected
+* In the Google Sheets menu, select File->Download->Comma separated values (csv). This should download the file to your computer. 
+* Now switch back to rstudio.cloud
+* In the Files tab in the lower right-hand corner, click "Upload"
+* Click "Choose File" to locate it on your computer. 
+* Once you've selected the file, click "Ok" to begin the upload.
+* Once it's loaded, you should see it listed among your files in the Files tab.
+* Finally, you may want to rename the file to something simple, just to make it easier when you use the read_csv function. Click the checkbox next to the file, click 'Rename', and call it something like 'myData.csv'
+
+
+
+
+```{r}
+#Note: "data.csv" is Jeremy's pre-loaded data set. Change the file name below if you want to load your data set (e.g. "myData.csv" if that's what you named your csv file).
+
+myData<-read_csv("JeremyData.csv")
+myData
+#change file name if necessary
+
+
+
+```
+
+
+
+### Manually creating data sets
+
+Ideally you would want to use R tools to "wrangle" your data to the format needed to create a data visualization, but it can get a little complicated in a hurry. For the sake of simplicity, let's look at how you can use the data.frame & c functions to create a data frame:
+
+```{r}
+#Each entry inside the data.frame function creates a column of data, in order.
+#
+
+textsMom <- data.frame(
+  Days=c("9/9","9/10","9/11"),
+  TextsToMom=c(13,7,9)
+
+)
+
+textsMom
+
+```
+
+YOUR TURN:
+Manually create a data frame called "money" with an output that looks like this:
+
+Date | MoneySpent
+----  -----------
+9/9  | 3.00
+9/10 | 4.50
+9/11 | 19.99
+
+
+```{r}
+
+#Hint, make sure the Date values are in quotes
+
+
+
+
+```
+
+
+
+
+### bar graphs
+
+Initial strategy: we need our data in this format:
+
+name | value
+A    | 25
+B    | 10
+C    | 12
+
+
+We can use the "money" data set that we just created. Let's look at the bar chart code:
+
+
+```{r}
+
+ggplot(data=money, mapping=aes(x=Date, y=MoneySpent, fill=Date))+
+  geom_bar(stat="identity")+
+  labs(x="Date", y="Dollars spent", title="Expenditures over 3 days")
+
+
+# barData is the data set
+# x & y refer to the column headings
+# the "fill=Variable" creates the color and legend
+# in geom_bar, stat="identity" means "use the values in the dataset"
+# "labs" lets you create labels for x- and y- axes, and the title
+
+
+```
+
+I can now save this as a file, using "ggsave":
+```{r}
+# this will save the last plot generated, and will appear in the files area
+ggsave("barplot.jpg")
+
+```
+
+Alternate way of using "ggsave", explicitly referring to a plot assigned to a variable:
+
+```{r}
+
+myBarPlot<-ggplot(data=money, mapping=aes(x=Date, y=MoneySpent, fill=Date))+
+  geom_bar(stat="identity")+
+  labs(x="Date", y="Money spent per day", title="Expenditures over 3 days")
+
+
+# this will save the last plot generated, and will appear in the files area
+ggsave("barplot2.jpg", plot=myBarPlot)
+
+```
+
+
+
+
+YOUR TURN:
+
+Use the "textsMom" data set to create a bar plot, and save it as texts.jpg.
+
+
+
+```{r}
+
+# Look at the structure of texts first:
+textsMom
+
+
+
+
+
+```
+
+
+```{r}
+
+# Copy and past the ggplot code from above, and adjust the x, y, and fill values. Also change the labels.
+
+
+
+```
+
+
+```{r}
+#Now save the plot as texts.jpg
+
+
+```
+
+
+
+### Boxplot
+
+For a single boxplot, we need our data in "tidy" format. So we can use our "tidyData" variable we defined earlier. Below is the code for showing the average
+
+In this case, we're going to create a plot of the variable "timesEmailChecked"
+
+```{r}
+
+ggplot(data=money, mapping=aes(x="",y=MoneySpent))+
+  geom_boxplot()+
+  labs(y="Money Spent per day", x="Money Spent", title="")
+
+# the "stat_summary" part generates the red dot to show the mean
+
+
+```
+
+Showing multiple boxplots side by side can be a really effective way to show differences in variables that use the same units (e.g. "times per day", etc/). The data set structure is a little more complicated, and is probably easiest just to manually create. Here's the format:
+
+Date | Variable | Value
+-----|----------|------
+9/1  | TextsMom | 2
+9/1  | TextsDad | 1
+9/2  | TextsMom | 7
+9/2  | TextsDad | 0
+9/3  | TextsMom | 4
+9/3  | TextsDad | 2
+
+```{r}
+boxDataTexts <- data.frame(
+  Days=c("9/1","9/1","9/2","9/2","9/3","9/3"),
+  Variable=c("Mom","Dad","Mom","Dad","Mom","Dad"),
+  Value=c(2,1,7,0,4,2)
+)
+
+boxDataTexts
+```
+
+```{r}
+ggplot(data=boxDataTexts, mapping=aes(x=Variable, y=Value, fill=Variable)) +
+  geom_boxplot()+
+  labs(y="Texts per day", x="Family Member", title="Texts to family members between 9/1 & 9/3")+
+  scale_fill_discrete(name = "Family Member")
+
+# the "fill=Variable" auto-assigns a color to each variable group, and generates the legend
+# scale_fill_discrete lets you change the legend title
+
+
+```
+
+
+YOUR TURN:
+
+Create a plot showing three boxplots side by side, using the data and code above, but adding the variable "Sister", with values 11,8, and 12.
+
+```{r}
+# Redefine your boxDataTexts variable to include the sister data, and print to screen to confirm
+
+
+
+```
+
+
+```{r}
+# Generate the plot
+
+
+
+```
+
+
+
+
+
+### Pie chart
+
+Initial strategy: we need our data in this format:
+
+name | value
+A    | 25
+B    | 10
+C    | 12
+D    | 40
+
+We can use the "money" variable, since it's in this format
+
+
+
+```{r}
+
+# Basic piechart
+ggplot(data=money, aes(x="", y=MoneySpent, fill=Date)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0)+
+  labs(title="Texts per day", y="", x="")+
+  scale_fill_discrete(name = "Money Spent")
+
+
+
+
+
+# This one is a little unusual...it uses the geom_bar function, and the "coord_polar" function turns it into a circle
+# in the labs function, leaving x&y blank b/c it doesn't really make sense
+# scale_fill_discrete 
+
+
+```
+
+
+YOUR TURN:
+
+Create a pie chart using the textsMom data set from above (it has the same data structure):
+
+```{r}
+
+#print out textsMom first to refresh on its structure
+textsMom
+
+#copy the pic chart code from above, 
+
+
+```
+
+
+
+
+
+
+### x/y plots 
+
+X/y, or line plots, can show a relationship (or lack thereof) between two variables. 
+
+Let's consider this manaul data set below:
+
+```{r}
+
+texts<-data.frame(
+
+  Brother=c(10,11,10,12),
+  Sister=c(20,22,20,25)
+
+)
+
+texts
+
+```
+
+
+
+```{r}
+
+ggplot(data=texts, mapping=aes(x=Sister, y=Brother))+
+  geom_line(color="blue")+
+  labs(x="Texts to Sister", y="Texts to Brother", title="Relationship of Texts rate between family members")
+
+# in the aes portion, define your x and y variables based upon the column headings of the data set.
+# we can give our line some color within the geom_line function
+
+```
+
+
+
+YOUR TURN:
+
+Change some of the values in the texts data frame, and regerate the plot. See anything interesting?
+
+
+```{r}
+
+
+
+
+
+
+
+```
+
+
+
+
+
+### ASK FOR HELP IF YOU NEED IT!!!!
+* Jeremy: jeremym@lclark.edu
+* R Office hours: Tues/Thurs 2-3pm, Watzek 343, or by appointment
+
+
+
+
+

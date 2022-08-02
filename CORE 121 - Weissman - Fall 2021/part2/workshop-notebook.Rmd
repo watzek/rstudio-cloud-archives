@@ -1,0 +1,449 @@
+---
+title: "Core121 Weissman 2021 part2"
+output: pdf_document
+---
+
+
+# Data Visualizations with R workshop
+## CORE 121, Professor Weissman-Unni
+## September 17th, 2021
+
+
+### Goals of this workshop:
+
+* Refresh on Loading Data Sets
+* Manually Creating Data sets
+* Learn the basics of ggplot for visualizations
+* Practice creating histograms, boxplots, line graphs, bar graphs, and pie charts
+* Save a plots as an image file
+
+### ASK FOR HELP IF YOU NEED IT!!!!
+* Jeremy: jeremym@lclark.edu
+* R Office hours: Tues/Thurs 2-3pm, Watzek 343, or by appointment
+
+
+### Load prerequisites
+
+First we need to load the Tidyverse, and a custom function for converting your data to "tidy" format:
+
+
+```{r}
+library(tidyverse)
+
+
+#contains a function named "formatFile" to put data in "tidy" format, when needed
+source("transpose.R")
+```
+
+Now load your file from Google Drive. As a refresher, here are the steps:
+
+
+* In another browser tab, find your data (or use https://bit.ly/jm-core121-data)
+* Take a moment, and eliminate any units from data (ideally include in row headers)!!
+* Make sure the "Phase 2:Data" worksheet is selected
+* In the Google Sheets menu, select File->Download->Comma separated values (csv). This should download the file to your computer. 
+* Now switch back to rstudio.cloud
+* In the Files tab in the lower right-hand corner, click "Upload"
+* Click "Choose File" to locate it on your computer. 
+* Once you've selected the file, click "Ok" to begin the upload.
+* Once it's loaded, you should see it listed among your files in the Files tab.
+* Finally, you may want to rename the file to something simple, just to make it easier when you use the read_csv function. Click the checkbox next to the file, click 'Rename', and call it something like 'myData.csv'
+
+
+
+Now create a variable "tidyData", and assign it to the output of the "formatFile()" function, passing your file name as the argument. We'll use this in at least one example below.
+
+
+```{r}
+#Note: "data.csv" is Jeremy's pre-loaded data set. Change the file name below if you want to load your data set (e.g. "myData.csv" if that's what you named your csv file).
+
+gDriveData<-read_csv("data.csv")
+gDriveData
+#change file name if necessary
+
+tidyData<-formatFile("data.csv")
+tidyData
+
+# if this doesn't work on your data set, don't fret! Just use the pre-loaded 'data.csv' file for today, and ask Jeremy later.
+
+```
+
+
+
+### Manually creating data sets
+
+Ideally you would want to use R tools to "wrangle" your data to the format needed to create a data visualization, but it can get a little complicated in a hurry. For the sake of simplicity, let's look at how you can use the data.frame & c functions to create a data frame:
+
+```{r}
+#Each entry inside the data.frame function creates a column of data, in order.
+#
+
+manualData <- data.frame(
+  Days=c("Monday","Tuesday","Wednesday","Thursday","Friday"),
+  TextsToMom=c(13,7,9,21,2),
+  TimesEmailChecked=c(3,4,7,4,1)
+)
+
+manualData
+
+```
+
+YOUR TURN:
+Manually create a data frame with an output that looks like this:
+
+Date | MoneySpent
+----  -----------
+9/9  | 3.00
+9/10 | 4.50
+9/11 | 20.00
+9/12 | 12.99
+
+```{r}
+
+#Hint, make sure the Date values are in quotes
+
+
+```
+
+
+
+### ggplot basics
+
+Now we're going to use the tidyverse package "ggplot" to create our data visualizations. The "gg" translates to "grammar of graphics", and is founded in the idea that all data visualizations are comprised of three components:
+
+* data set
+* aesthetics, or visual marks that represent the data (i.e. the stuff that you see)
+* geometric objects, or "geoms" (e.g the type of plot)
+
+The basic structure of ggplot code looks like this (the stuff inside the "<>" isn't real code...it's just placeholder text for info you'll fill in):
+
+ggplot(data=<data set variable>, mapping=aes(<details about x,y,etc.>))+
+  geom_<type of plot>(<sometimes more stuff, depending on the plot type>)+
+  <sometimes other stuff, but it depends!>
+
+
+Probably the best way to look at the differences is just to dive into some examples. Also, the above code can be typed as one line, but it can be easier to read by adding a new indented line after the "+" sign.
+
+
+
+### bar graphs
+
+Initial strategy: we need our data in this format:
+
+name | value
+A    | 25
+B    | 10
+C    | 12
+D    | 40
+
+Let's create a bar graph that shows the mean of some of the variables in our data set.
+
+In this case we can use our original data set (gDriveData), and use the following code to calculate the average of each row:
+
+```{r}
+
+
+
+gDriveData$Mean <- rowMeans(gDriveData[,c(2:7)])
+
+gDriveData
+
+
+#Here we're creating a new column, called "Mean", and using the rowMeans function
+
+#We're targeting columns 2 through 7 (and all rows, hence the [,...], as the syntax is [rows,columns])
+
+# c(2:7) is the same as c(2,3,4,5,6,7)
+
+```
+
+
+Say we wanted just the 1st and 3rd rows for our plot, and we only care about the 1st and 9th columns. We can create a 
+
+
+```{r}
+barData<-gDriveData[c(1,3),c(1,9)]
+barData
+```
+
+Now that our data is ready, we can look at the bar chart code:
+
+```{r}
+
+ggplot(data=barData, mapping=aes(x=Variable, y=Mean, fill=Variable))+
+  geom_bar(stat="identity")+
+  labs(x="MyMeasurements", y="Average count/day", title="My Daily Diary Entries")
+
+
+# barData is the data set
+# x & y refer to the column headings
+# the "fill=Variable" creates the color and legend
+# in geom_bar, stat="identity" means "use the values in the dataset"
+# "labs" lets you create labels for x- and y- axes, and the title
+
+
+```
+
+I can now save this as a file, using "ggsave":
+```{r}
+# this will save the last plot generated, and will appear in the files area
+ggsave("barplot.jpg")
+
+```
+
+Alternate way of using "ggsave", explicitly referring to a plot assigned to a variable:
+
+```{r}
+
+myBarPlot<-ggplot(data=barData, mapping=aes(x=Variable, y=Mean, fill=Variable))+
+  geom_bar(stat="identity")+
+  labs(x="MyMeasurements", y="Average count/day", title="My Daily Diary Entries")
+
+
+# this will save the last plot generated, and will appear in the files area
+ggsave("barplot2.jpg", plot=myBarPlot)
+
+```
+
+
+
+
+YOUR TURN:
+
+Create a bar chart with all variables from the gDriveData data set (never mind that the y units aren't the same, though normally you would!). Then save it as "barplot3.jpg".
+
+```{r}
+
+
+
+
+
+
+
+```
+
+
+
+
+### Boxplot
+
+For a single boxplot, we need our data in "tidy" format. So we can use our "tidyData" variable we defined earlier. Below is the code for showing the average
+
+In this case, we're going to create a plot of the variable "timesEmailChecked"
+
+```{r}
+
+ggplot(data=tidyData, mapping=aes(x="",y=timesEmailChecked))+
+  geom_boxplot()+
+  stat_summary(fun=mean, geom="point", shape=20, size=5, color="red", fill="red")+
+  labs(y="Times email checked per day", x="email checked", title="Boxplot of Times Email checked, Sept 9-14")
+
+# the "stat_summary" part generates the red dot to show the mean
+
+
+```
+
+Showing multiple boxplots side by side can be a really effective way to show differences in variables that use the same units (e.g. "times per day", etc/). The data set structure is a little more complicated, and is probably easiest just to manually create. Here's the format:
+
+Date | Variable | Value
+-----|----------|------
+9/1  | TextsMom | 2
+9/1  | TextsDad | 1
+9/2  | TextsMom | 7
+9/2  | TextsDad | 0
+9/3  | TextsMom | 4
+9/3  | TextsDad | 2
+
+```{r}
+boxDataTexts <- data.frame(
+  Days=c("9/1","9/1","9/2","9/2","9/3","9/3"),
+  Variable=c("Mom","Dad","Mom","Dad","Mom","Dad"),
+  Value=c(2,1,7,0,4,2)
+)
+
+boxDataTexts
+```
+
+```{r}
+ggplot(data=boxDataTexts, mapping=aes(x=Variable, y=Value, fill=Variable)) +
+  geom_boxplot()+
+  stat_summary(fun=mean, geom="point", shape=20, size=5, color="red", fill="red")+
+  labs(y="Texts per day", x="Family Member", title="Texts to family members between 9/1 & 9/3")+
+  scale_fill_discrete(name = "Family Member")
+
+# the "fill=Variable" auto-assigns a color to each variable group, and generates the legend
+# stat_sumary shows the averages
+# scale_fill_discrete lets you change the legend title
+
+
+```
+
+
+YOUR TURN:
+
+Create a plot showing three boxplots side by side, using the data and code above, but adding the variable "Sister", with values 11,8, and 12.
+
+```{r}
+# Redefine your boxDataTexts variable to include the sister data, and print to screen to confirm
+
+
+
+```
+
+
+```{r}
+# Generate the plot
+
+
+
+```
+
+
+
+
+
+### Pie chart
+
+Initial strategy: we need our data in this format:
+
+name | value
+A    | 25
+B    | 10
+C    | 12
+D    | 40
+
+We're going to manually create a data set for this, though we could use the same approach as the bar data above if we wanted to display averages of data.
+
+```{r}
+
+# Create Data
+pieData <- data.frame(
+  group=c("Monday","Tuesday","Wednesday","Thursday","Friday"),
+  value=c(13,7,9,21,2)
+)
+
+pieData
+
+
+```
+
+
+
+
+
+
+```{r}
+
+# Basic piechart
+ggplot(data=pieData, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0)+
+  labs(title="Texts per day", y="", x="")+
+  scale_fill_discrete(name = "Day of the week")
+
+
+
+
+
+# This one is a little unusual...it uses the geom_bar function, and the "coord_polar" function turns it into a circle
+# in the labs function, leaving x&y blank b/c it doesn't really make sense
+# scale_fill_discrete 
+
+
+```
+
+
+YOUR TURN:
+
+Create a pie chart using the barData data set from above (it has the same data structure):
+
+```{r}
+
+
+
+
+
+
+```
+
+
+
+
+
+
+### x/y plots 
+
+Can show a relationship (or lack thereof) between two variables. In this case, we need our data to be "tidy", so we can use the "tidyData" variable.
+
+
+
+```{r}
+myData
+ggplot(data=tidyData, mapping=aes(x=bananasEaten, y=minutesExercised))+
+  geom_line(color="blue")+
+  labs(x="Bananas Eaten", y="Minutes Exercised", title="Early September Bananas to Exercise relationship")
+
+# in the aes portion, define your x and y variables based upon the column headings of the data set.
+# we can give our line some color within the geom_line function
+
+```
+
+
+
+YOUR TURN:
+
+Generate an x/y line plot, selecting two variables of your choosing. See any intersting relationships?
+
+
+```{r}
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+#### Histograms
+
+Histograms show frequency distribution of data. Often they're used to tell if your data fits a "normal" (i.e. bell curved) distribution.
+
+
+
+
+```{r}
+
+ggplot(data=tidyData, mapping=aes(x=hoursOfSleep))+
+  geom_histogram(color="blue")
+
+```
+
+One really key concept of histograms is the idea of "bins". You can think of a bin as a range in which data points can fall. Say you have a data set containing numbers from 0 to 10, and your histogram has 4 bins. That means data can fall into these specific bins:
+
+* 0-2.5
+* 2.5-5
+* 5-7.5
+* 7.5-10
+
+How might the histogram look different if you had 10 bins? Or 1 bin?
+
+
+For more on histograms using ggplot, check out the tutorial here: https://www.sharpsightlabs.com/blog/histogram-r-ggplot2/
+
+
+
+
+### ASK FOR HELP IF YOU NEED IT!!!!
+* Jeremy: jeremym@lclark.edu
+* R Office hours: Tues/Thurs 2-3pm, Watzek 343, or by appointment
+
+
+
+
+

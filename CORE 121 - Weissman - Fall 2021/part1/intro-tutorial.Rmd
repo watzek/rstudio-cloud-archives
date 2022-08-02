@@ -1,0 +1,322 @@
+---
+title: "Intro to R workshop, CORE 121, Professor Weissman-Unni"
+output:
+  pdf_document: default
+
+---
+
+# Intro to R workshop
+## CORE 121, Professor Weissman-Unni
+## September 13th, 2021
+
+
+### Goals of this workshop:
+
+* Gain some familiarity with RStudio Server
+* Write some basic R code
+* Work with a data set
+
+A quick note before getting started: the syntax of this document is "R Markdown". It basically is a way of formatting text...ignore it for now, and we'll take a look at it at the end of class.
+
+
+
+### Basic R code
+
+R code can be run in the console, or as a "code chunk" within this R notebook. Below is a code chunk. You can run the code chunk by clicking the green "play" button.
+
+```{r}
+2+2
+```
+
+Throughout this workshop, there will be a mix of code chunks pre-populated with code, and empty code chunks. The empty code chunks give you an opportunity to write code, run it, and see the output. Each of the empty chunks are preceded with "YOUR TURN:".
+
+#### Assigning variables
+
+Creating variables in R isn't so bad. Most scripting languages use the "=" sign, but R uses "<-". So below, I'm creating a variable x, and setting it equal to 10. Afterward, I entered "x", which should output the value of x:
+
+```{r}
+
+#Anything preceded by a "#" is a "comment". It does not get executed as code.
+#Comments can be super helpful to provide info on your code.
+
+# assigns 10 to x
+x<-10
+
+# prints x
+x
+
+
+```
+
+
+YOUR TURN:
+Now try creating a variable "y", set it equal to 7+9, and then print it out:
+```{r}
+
+
+```
+
+
+
+#### Functions
+
+Like most languages, R has functions that help you quickly execute common tasks. Functions typically take the form of:
+
+functionName(argument1, argument2, etc....)
+
+For example, the function sqrt(number) takes the square root of a number:
+
+```{r}
+sqrt(9)
+```
+
+
+YOUR TURN:
+In the chunk below, create a variable 'z', set it equal to the square root of 90, and print it out:
+```{r}
+
+
+```
+
+One nice thing about RStudio Server is that you can readily access documentation for functions by using the "help" command:
+
+```{r}
+help(sqrt)
+```
+
+The documentation appears in the lower right window in the "help" tab.
+
+
+#### Statistical Functions
+
+Let's start with the "c" function. "c" stands for "combine", and is used to create a one-dimensional array of values (also known as a "vector"). You could also think of this as a column of data from a spreadsheet.
+
+Your variable might be "texts to mom", or something else you might be measuring in your data diary.
+
+
+```{r}
+# I polled my coworkers at Watzek Library to see how many pets were in each household:
+watzekPets<-c(1, 1, 2, 3, 2, 0, 1, 1, 1, 0, 0)
+
+#print it out
+watzekPets
+
+
+
+```
+
+
+Now let's say we want to know the average number of pets owned by Watzek staff. For this, we can use the mean function:
+
+```{r}
+
+avgPets<-mean(watzekPets)
+
+avgPets
+
+```
+
+
+We can also find the median, or midpoint, of the data by using the median function:
+
+```{r}
+
+medPets<-median(watzekPets)
+
+medPets
+
+```
+
+
+
+We can also determine the standard deviation of our data. Standard Deviation is a measure of how spread apart the measurements are. 
+
+```{r}
+sdPets<-sd(watzekPets)
+
+#print it out
+sdPets
+```
+
+For comparison's sake, run the code sample below on a dataset of measurements that vary much more widely:
+
+```{r}
+
+#pretend dataset of current coins in your pocket of Watzek staff:
+
+watzekCoins<-c(2, 10, 15, 5, 2, 0, 11, 600, 25)
+
+#print average number of coins
+mean(watzekCoins)
+
+median(watzekCoins)
+
+#print standard deviation of watzekCoins
+sd(watzekCoins)
+
+
+
+```
+
+
+
+
+
+
+
+YOUR TURN:
+In the code chunk below, create an array called myArray, and set it equal to 3, 7, 8.5, 20, 4, 1, and 15. Print out the mean, median, and standard deviation.
+
+```{r}
+
+# define myArray:
+
+
+#print mean:
+
+
+#print median
+
+
+#print standard deviation:
+
+
+
+
+```
+
+
+
+
+### Working with a Data Set
+
+
+Before working with data, let's quickly talk about packages and libraries in R. While some functions are built in with R (e.g. sqrt), others require users to install packages. A **package** is just a collection of functions, while a **library** is the location of where that package lives.    
+
+In R, there's a special package called the "Tidyverse". The Tidyverse is actually a collection of smaller packages that provide functions for reading, filtering, and cleaning data. It also includes "ggplot", which is used heavily for data visualizations. We'll use some of the functions in the Tidyverse, so we need to load them. Run the code chunk below:
+
+
+```{r}
+library(tidyverse)
+```
+
+
+Let's now load a csv file. If you look in the Files tab in the lower right-hand corner of RStudio Server, you'll see a file named "JMExercise.csv". This file contains the number of minutes I've spent swimming, walking, and cycling from September 1st to September 8th, 2021.
+
+We can load this into our R environment by using the read_csv function:
+
+```{r}
+myMinutes<-read_csv("JMExercise.csv")
+```
+
+
+
+The variable "myMinutes" now contains the full csv file in a dataframe in "tidy" format. A tidy dataframe has these properties:
+
+* each column is a variable
+* each row is an observation
+* each cell is a single value
+
+
+
+We can take a look by printing the variable myMinutes:
+
+```{r}
+myMinutes
+```
+
+
+Printing out the dataframe can be very useful, as you can see the structure of your data, and also easily refer to column headings, which will use next.
+
+Let's say were interested in finding the average minutes walked. You can create an array of values by targeting a column from the tibble by using the "$" between the tibble variable and columns:
+
+```{r}
+
+# notice the column name is contained in quotes. 
+minWalked<-myMinutes$`Walking(minutes)`
+
+#print values for "Walking(minutes)" column:
+minWalked
+
+```
+
+
+Now let's find the average, using the "mean" function, as we did earlier:
+
+
+```{r}
+
+avgWalked<-mean(minWalked)
+
+avgWalked
+
+
+```
+
+
+
+Now it's your turn. Can you find the mean, median, and standard deviation of the "Cycling(minutes)" column?
+
+```{r}
+
+# Create a variable that targets the Cycling(minutes) column
+# You may want to print it out to ensure you did it correctly
+
+
+
+# Determine/print mean, median, and standard deviation of "Cycling(minutes)"
+
+
+
+
+```
+
+
+
+
+
+##Loading an external data set
+
+Now we're going to practice loading your data from your Google Spreadsheet. If you don't have yours readily available, you can use mine: https://bit.ly/jm-core121-data
+
+* In another browser tab, find your data (or use mine above)
+* Make sure the "Phase 2:Data" worksheet is selected
+* In the Google Sheets menu, select File->Download->Comma separated values (csv). This should download the file to your computer. 
+* Now switch back to rstudio.cloud
+* In the Files tab in the lower right-hand corner, click "Upload"
+* Click "Choose File" to locate it on your computer. 
+* Once you've selected the file, click "Ok" to begin the upload.
+* Once it's loaded, you should see it listed among your files in the Files tab.
+* Finally, you may want to rename the file to something simple, just to make it easier when you use the read_csv function. Click the checkbox next to the file, click 'Rename', and call it something like 'myData.csv'
+
+Now you can load it into your R environment by running the read_csv command as before (uncomment and edit the lines below as approprite):
+
+```{r}
+
+#Load the data to a variable:
+#myData<-read_csv("myData.csv")
+
+#Print it out:
+#myData
+
+```
+
+
+You'll need to know how to do this so you can work with your dataset next time.
+
+You might notice that the data isn't in "tidy" format, but that's ok. We'll deal with that next time.
+
+
+Now press "Knit" in the menu above to see how the markdown works!
+
+
+Need help?
+Email Jeremy at jeremym@lclark.edu
+Jeremy is also hosting R office hours in Watzek 343: 
+Tuesdays 2-3pm
+Thursdays 2-3pm
+or by appointment
+
+
+
+
